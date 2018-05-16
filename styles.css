@@ -64,3 +64,11 @@ button{
     border:1px solid black;
 }
 
+i{
+    margin: auto;
+}
+/*span::before{*/
+    /*content:"";*/
+/*}*/
+
+

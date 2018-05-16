@@ -2,7 +2,10 @@ function ChatTree(element) {
 
     function load(items) {
         element.addEventListener("keydown",arrowsKeyboard);
-        element.addEventListener("click",focusItem);
+        element.addEventListener("click",(e)=>{
+            e.stopPropagation();
+            e.target.focus();
+        });
         element.addEventListener("dblclick",showHideGroups);
 
         clear();
@@ -10,10 +13,14 @@ function ChatTree(element) {
             let li = document.createElement("li");
             let span = document.createElement("span");
             span.setAttribute("tabindex","1");
-            span.appendChild(document.createTextNode(item.name));
+            if(item.type !== "group"){
+                span.appendChild(document.createTextNode(item.name));
+            }
+
             li.appendChild(span);
             element.appendChild(li);
             if(item.type === "group"){
+                span.innerHTML = ('&#128193'+item.name);
                 span.classList.add("group");
                 if(item.items.length>0){
                     let hiddenUL = _createHiddenUl(item.items);
@@ -32,37 +39,35 @@ function ChatTree(element) {
         if (e.keyCode == '38') {
             // up arrow
             let elements = document.querySelectorAll("li");
-            let n =[];
+            let displayedElements =[];
             for(let i=0;i<elements.length; i++){
                 if (elements[i].offsetParent !== null) {
-                    n.push(elements[i]);
+                    displayedElements.push(elements[i]);
                 }
             }
-            let index = n.indexOf(e.target.parentElement);
+            let index = displayedElements.indexOf(e.target.parentElement);
             if(index>0){
-                let elem = n[index-1];
+                let elem = displayedElements[index-1];
                 elem.querySelector("span").focus();
             }
         }
         else if (e.keyCode == '40') {
             // down arrow
             let elements = document.querySelectorAll("li");
-            let n =[];
+            let displayedElements =[];
             for(let i=0;i<elements.length; i++){
                 if (elements[i].offsetParent !== null) {
-                    n.push(elements[i]);
+                    displayedElements.push(elements[i]);
                 }
             }
-            let index = n.indexOf(e.target.parentElement);
-            if(index<n.length-1){
-                let elem = n[index+1];
+            let index = displayedElements.indexOf(e.target.parentElement);
+            if(index<displayedElements.length-1){
+                let elem = displayedElements[index+1];
                 elem.querySelector("span").focus();
             }
-            // next(e.target.parentElement);
         }
         else if (e.keyCode == '37' && e.target.classList.contains("group")) {
             // left arrow
-            // debugger
             let ul = e.target.parentElement.querySelector(":scope > ul");
             if(!!ul){
                 if(ul.classList.contains("hidden")){
@@ -74,7 +79,6 @@ function ChatTree(element) {
                         }
                     }
                     parent.querySelector(":scope > span").focus();
-                    // x.focus();
                 }
                 else{
                     ul.classList.add("hidden");
@@ -106,16 +110,18 @@ function ChatTree(element) {
             ul.classList.add("hidden");
         }
         else {return ;}
-
         items.forEach((item)=> {
             let li = document.createElement("li");
             let span = document.createElement("span");
-            span.setAttribute("tabindex","1");
-            span.innerHTML = (level+item.name);
-            // span.appendChild(document.createTextNode(level+item.name));
+            // span.innerHTML = (level+item.name)
+            if(item.type !== "group"){
+                span.innerHTML = (level+item.name);
+            }
+            span.setAttribute("tabindex","1");;
             li.appendChild(span);
             ul.appendChild(li);
             if (item.type === "group") {
+                span.innerHTML = (level+'&#128193'+item.name);
                 span.classList.add("group");
                 let hiddenUL = _createHiddenUl(item.items,level);
                 if(!!hiddenUL){
@@ -130,10 +136,6 @@ function ChatTree(element) {
         while(element.firstChild ){
             element.removeChild( element.firstChild );
         }
-    }
-
-    function focusItem(e){
-        e.target.focus();
     }
 
     function showHideGroups(e){
